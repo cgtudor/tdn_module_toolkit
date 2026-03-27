@@ -17,8 +17,6 @@ if not exist "venv\Scripts\python.exe" (
 REM Use venv python/pip directly (more reliable than activate)
 set VENV_PYTHON=venv\Scripts\python.exe
 set VENV_PIP=venv\Scripts\pip.exe
-set VENV_PYINSTALLER=venv\Scripts\pyinstaller.exe
-
 REM Install PyInstaller if not present
 %VENV_PIP% show pyinstaller >nul 2>&1
 if errorlevel 1 (
@@ -32,11 +30,11 @@ REM Clean previous build
 if exist "dist" rmdir /s /q "dist"
 if exist "build" rmdir /s /q "build"
 
-REM Build with PyInstaller
+REM Build with PyInstaller (use python -m for reliable invocation)
 REM --onedir: Creates a directory with all dependencies (faster startup than --onefile)
 REM --name: Name of the output executable
 REM --hidden-import: Include modules that PyInstaller might miss
-%VENV_PYINSTALLER% --onedir --name tdn-backend ^
+%VENV_PYTHON% -m PyInstaller --onedir --name tdn-backend ^
     --hidden-import uvicorn.logging ^
     --hidden-import uvicorn.loops.auto ^
     --hidden-import uvicorn.protocols.http.auto ^
@@ -52,6 +50,11 @@ REM --hidden-import: Include modules that PyInstaller might miss
     --hidden-import watchdog.observers ^
     --hidden-import watchdog.events ^
     --hidden-import sse_starlette ^
+    --hidden-import PIL ^
+    --hidden-import PIL.Image ^
+    --hidden-import PIL.TgaImagePlugin ^
+    --hidden-import PIL.DdsImagePlugin ^
+    --hidden-import PIL.PngImagePlugin ^
     --add-data "services;services" ^
     --add-data "api;api" ^
     --add-data "models;models" ^

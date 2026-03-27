@@ -395,7 +395,7 @@ logger.info("Creating FastAPI app...")
 app = FastAPI(
     title="TDN Module Toolkit",
     description="Inventory management tool for The Dragon's Neck module",
-    version="1.0.0",
+    version="1.1.0",
     lifespan=lifespan
 )
 logger.info("FastAPI app created")

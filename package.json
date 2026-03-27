@@ -1,6 +1,6 @@
 {
   "name": "tdn-module-toolkit",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "TDN Module Toolkit - Desktop application for managing NWN module content",
   "main": "electron/dist/main.js",
   "author": "TDN Team",
