@@ -43,3 +43,6 @@ npm-debug.log*
 # Test
 coverage/
 .pytest_cache/
+
+# Icon cache
+backend/icon_cache/

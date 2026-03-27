@@ -3,6 +3,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogD
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -49,7 +50,7 @@ function PartGrid({
   partPrefix?: string;
 }) {
   return (
-    <div className="grid grid-cols-6 gap-2">
+    <div className="grid grid-cols-5 gap-1.5">
       {parts.map((part) => {
         const previewParams = partPrefix
           ? `base_item=${baseItem}&p1=${partPrefix === 'b' ? part : 1}&p2=${partPrefix === 'm' ? part : 1}&p3=${partPrefix === 't' ? part : 1}`
@@ -59,7 +60,7 @@ function PartGrid({
           <button
             key={part}
             className={cn(
-              'w-16 h-16 rounded border-2 bg-muted flex flex-col items-center justify-center overflow-hidden transition-colors',
+              'w-14 h-14 rounded border-2 bg-muted flex flex-col items-center justify-center overflow-hidden transition-colors',
               selectedPart === part
                 ? 'border-primary bg-primary/10'
                 : 'border-transparent hover:border-muted-foreground/30'
@@ -70,13 +71,13 @@ function PartGrid({
             <img
               src={`/api/icons/preview?${previewParams}`}
               alt={`Part ${part}`}
-              className="w-12 h-12 object-contain"
+              className="w-10 h-10 object-contain"
               style={{ imageRendering: 'pixelated' }}
               onError={(e) => {
                 (e.target as HTMLImageElement).style.display = 'none';
               }}
             />
-            <span className="text-[10px] text-muted-foreground">{part}</span>
+            <span className="text-[10px] text-muted-foreground leading-none">{part}</span>
           </button>
         );
       })}
@@ -133,10 +134,11 @@ export function IconPicker({
   };
 
   const hasChanges = part1 !== currentPart1 || part2 !== currentPart2 || part3 !== currentPart3;
+  const isComposite = availableParts?.model_type === 2;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-xl max-h-[90vh]">
+      <DialogContent className="max-w-3xl max-h-[90vh]">
         <DialogHeader>
           <DialogTitle>Change Item Icon</DialogTitle>
           <DialogDescription>
@@ -144,54 +146,79 @@ export function IconPicker({
           </DialogDescription>
         </DialogHeader>
 
-        {/* Live preview */}
-        <div className="flex items-center justify-center py-2">
-          <div className="w-16 h-16 rounded-lg bg-muted flex items-center justify-center overflow-hidden">
-            <img
-              src={`/api/icons/preview?base_item=${baseItem}&p1=${part1}&p2=${part2}&p3=${part3}`}
-              alt="Preview"
-              className="w-16 h-16 object-contain"
-              style={{ imageRendering: 'pixelated' }}
-            />
-          </div>
-        </div>
-
-        <ScrollArea className="h-[400px]">
-          {loading && (
-            <div className="flex items-center justify-center py-8">
-              <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-              <span className="ml-2 text-muted-foreground">Loading available icons...</span>
+        <div className="flex gap-6 min-h-[450px]">
+          {/* Left: Large preview */}
+          <div className="flex flex-col items-center gap-3 flex-shrink-0">
+            <div className="w-32 h-32 rounded-lg bg-muted border flex items-center justify-center overflow-hidden">
+              <img
+                src={`/api/icons/preview?base_item=${baseItem}&p1=${part1}&p2=${part2}&p3=${part3}`}
+                alt="Preview"
+                className="w-32 h-32 object-contain"
+                style={{ imageRendering: 'pixelated' }}
+              />
             </div>
-          )}
-
-          {error && (
-            <div className="text-destructive text-center py-8">{error}</div>
-          )}
-
-          {availableParts && !loading && (
-            <div className="space-y-4 pr-4">
-              {availableParts.model_type === 3 && (
-                <p className="text-muted-foreground text-sm">
-                  Armor icons are generated from body part models and cannot be changed through the icon picker.
-                </p>
+            <div className="text-xs text-muted-foreground text-center space-y-0.5">
+              {isComposite ? (
+                <>
+                  <div>Bottom: {part1}</div>
+                  <div>Middle: {part2}</div>
+                  <div>Top: {part3}</div>
+                </>
+              ) : (
+                <div>Part: {part1}</div>
               )}
+            </div>
+          </div>
 
-              {(availableParts.model_type === 0 || availableParts.model_type === 1) && (
-                <div className="space-y-2">
-                  <Label>Model Part ({(availableParts as AvailablePartsSimple).parts.length} available)</Label>
+          {/* Right: Part selector */}
+          <div className="flex-1 min-w-0">
+            {loading && (
+              <div className="flex items-center justify-center py-8">
+                <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+                <span className="ml-2 text-muted-foreground">Loading available icons...</span>
+              </div>
+            )}
+
+            {error && (
+              <div className="text-destructive text-center py-8">{error}</div>
+            )}
+
+            {availableParts && !loading && availableParts.model_type === 3 && (
+              <p className="text-muted-foreground text-sm py-8">
+                Armor icons are generated from body part models and cannot be changed through the icon picker.
+              </p>
+            )}
+
+            {availableParts && !loading && (availableParts.model_type === 0 || availableParts.model_type === 1) && (
+              <div className="space-y-2">
+                <Label>Model Part ({(availableParts as AvailablePartsSimple).parts.length} available)</Label>
+                <ScrollArea className="h-[400px]">
                   <PartGrid
                     parts={(availableParts as AvailablePartsSimple).parts}
                     selectedPart={part1}
                     onSelect={setPart1}
                     baseItem={baseItem}
                   />
-                </div>
-              )}
+                </ScrollArea>
+              </div>
+            )}
 
-              {availableParts.model_type === 2 && (
-                <>
-                  <div className="space-y-2">
-                    <Label>Bottom Part ({(availableParts as AvailablePartsComposite).bottom_parts.length} available)</Label>
+            {availableParts && !loading && availableParts.model_type === 2 && (
+              <Tabs defaultValue="bottom" className="w-full">
+                <TabsList className="grid w-full grid-cols-3">
+                  <TabsTrigger value="bottom">
+                    Bottom ({(availableParts as AvailablePartsComposite).bottom_parts.length})
+                  </TabsTrigger>
+                  <TabsTrigger value="middle">
+                    Middle ({(availableParts as AvailablePartsComposite).middle_parts.length})
+                  </TabsTrigger>
+                  <TabsTrigger value="top">
+                    Top ({(availableParts as AvailablePartsComposite).top_parts.length})
+                  </TabsTrigger>
+                </TabsList>
+
+                <ScrollArea className="h-[390px] mt-2">
+                  <TabsContent value="bottom" className="mt-0">
                     <PartGrid
                       parts={(availableParts as AvailablePartsComposite).bottom_parts}
                       selectedPart={part1}
@@ -199,10 +226,9 @@ export function IconPicker({
                       baseItem={baseItem}
                       partPrefix="b"
                     />
-                  </div>
+                  </TabsContent>
 
-                  <div className="space-y-2">
-                    <Label>Middle Part ({(availableParts as AvailablePartsComposite).middle_parts.length} available)</Label>
+                  <TabsContent value="middle" className="mt-0">
                     <PartGrid
                       parts={(availableParts as AvailablePartsComposite).middle_parts}
                       selectedPart={part2}
@@ -210,10 +236,9 @@ export function IconPicker({
                       baseItem={baseItem}
                       partPrefix="m"
                     />
-                  </div>
+                  </TabsContent>
 
-                  <div className="space-y-2">
-                    <Label>Top Part ({(availableParts as AvailablePartsComposite).top_parts.length} available)</Label>
+                  <TabsContent value="top" className="mt-0">
                     <PartGrid
                       parts={(availableParts as AvailablePartsComposite).top_parts}
                       selectedPart={part3}
@@ -221,12 +246,12 @@ export function IconPicker({
                       baseItem={baseItem}
                       partPrefix="t"
                     />
-                  </div>
-                </>
-              )}
-            </div>
-          )}
-        </ScrollArea>
+                  </TabsContent>
+                </ScrollArea>
+              </Tabs>
+            )}
+          </div>
+        </div>
 
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)}>
