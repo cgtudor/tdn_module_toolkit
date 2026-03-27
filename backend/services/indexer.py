@@ -1957,3 +1957,47 @@ class Indexer:
                 "INSERT INTO items_fts (resref, name) VALUES (?, ?)",
                 (resref, name)
             )
+
+    def update_store_index(self, resref: str, content_hash: Optional[str] = None):
+        """Update index for a single store.
+
+        Only deletes from index if the store truly doesn't exist on disk.
+        If the store exists but can't be read (e.g., in use), skips the update.
+        """
+        data = self.gff.get_store(resref)
+        if not data:
+            if not self.gff.store_exists(resref):
+                self._delete_store_from_index(resref)
+            else:
+                print(f"Skipping store index update for {resref}: file exists but couldn't be read")
+            return
+
+        self._index_single_store(resref, content_hash)
+
+    def update_creature_index(self, resref: str, content_hash: Optional[str] = None):
+        """Update index for a single creature.
+
+        Only deletes from index if the creature truly doesn't exist on disk.
+        If the creature exists but can't be read (e.g., in use), skips the update.
+        """
+        data = self.gff.get_creature(resref)
+        if not data:
+            if not self.gff.creature_exists(resref):
+                self._delete_creature_from_index(resref)
+            else:
+                print(f"Skipping creature index update for {resref}: file exists but couldn't be read")
+            return
+
+        self._index_single_creature(resref, content_hash)
+
+    def update_area_index(self, resref: str, content_hash: Optional[str] = None):
+        """Update index for a single area.
+
+        Only deletes from index if the area truly doesn't exist on disk.
+        """
+        git_data = self.gff.get_area_git(resref)
+        if not git_data:
+            self._delete_area_from_index(resref)
+            return
+
+        self._index_single_area(resref, content_hash)

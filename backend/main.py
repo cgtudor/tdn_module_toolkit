@@ -165,9 +165,15 @@ def on_file_change(event_type: str, file_type: str, resref: str):
     """Handle file change notifications."""
     print(f"File change: {event_type} {file_type} {resref}")
 
-    # Update index
+    # Update index for the changed resource type
     if file_type == "item":
         indexer.update_item_index(resref)
+    elif file_type == "store":
+        indexer.update_store_index(resref)
+    elif file_type == "creature":
+        indexer.update_creature_index(resref)
+    elif file_type in ("area", "area_meta"):
+        indexer.update_area_index(resref)
 
     # Queue event for SSE
     if event_queue:

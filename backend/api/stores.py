@@ -96,6 +96,8 @@ async def update_store_settings(resref: str, body: StoreSettingsUpdate):
     if not success:
         raise HTTPException(status_code=400, detail="Failed to update store settings")
 
+    indexer.update_store_index(resref)
+
     return {"success": True}
 
 
@@ -129,6 +131,8 @@ async def add_store_item_auto(resref: str, body: StoreItemAddAuto):
     if not result:
         raise HTTPException(status_code=400, detail="Failed to add item to store")
 
+    indexer.update_store_index(resref)
+
     return StoreItemAddResult(**result)
 
 
@@ -149,6 +153,8 @@ async def add_store_item(resref: str, category_id: int, body: StoreItemAdd):
     )
     if not success:
         raise HTTPException(status_code=400, detail="Failed to add item to store")
+
+    indexer.update_store_index(resref)
 
     return {"success": True, "item_resref": body.item_resref}
 
@@ -171,6 +177,8 @@ async def update_store_item(resref: str, category_id: int, index: int, body: Sto
     if not success:
         raise HTTPException(status_code=400, detail="Failed to update store item")
 
+    indexer.update_store_index(resref)
+
     return {"success": True}
 
 
@@ -183,5 +191,8 @@ async def remove_store_item(resref: str, category_id: int, index: int):
     success = inventory_ops.remove_store_item(resref, category_id, index)
     if not success:
         raise HTTPException(status_code=400, detail="Failed to remove store item")
+
+    # Update store search index so item counts and FTS stay in sync
+    indexer.update_store_index(resref)
 
     return {"success": True, "index": index}
