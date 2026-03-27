@@ -465,13 +465,16 @@ async def update_item(resref: str, update: ItemTemplateUpdate):
     if update.stolen is not None:
         GFFService.set_value(data, "Stolen", 1 if update.stolen else 0, "byte")
 
-    # 4b. Apply model part updates
+    # 4b. Apply model part updates (both byte ModelPart and word xModelPart for NWN:EE)
     if update.model_part1 is not None:
         GFFService.set_value(data, "ModelPart1", update.model_part1, "byte")
+        GFFService.set_value(data, "xModelPart1", update.model_part1, "word")
     if update.model_part2 is not None:
         GFFService.set_value(data, "ModelPart2", update.model_part2, "byte")
+        GFFService.set_value(data, "xModelPart2", update.model_part2, "word")
     if update.model_part3 is not None:
         GFFService.set_value(data, "ModelPart3", update.model_part3, "byte")
+        GFFService.set_value(data, "xModelPart3", update.model_part3, "word")
 
     # 5. Apply localized string updates
     if update.name:
