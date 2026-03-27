@@ -1,0 +1,59 @@
+{
+  "$schema": "https://raw.githubusercontent.com/electron-userland/electron-builder/master/packages/app-builder-lib/scheme.json",
+  "appId": "com.tdn.moduletoolkit",
+  "productName": "TDN Module Toolkit",
+  "copyright": "Copyright (c) 2024 TDN Team",
+  "compression": "normal",
+  "directories": {
+    "output": "release",
+    "buildResources": "resources"
+  },
+  "files": [
+    "electron/dist/**/*",
+    "electron/splash.html",
+    "package.json"
+  ],
+  "extraResources": [
+    {
+      "from": "build/python/tdn-backend/",
+      "to": "backend",
+      "filter": ["**/*"]
+    },
+    {
+      "from": "frontend/dist/",
+      "to": "frontend/dist",
+      "filter": ["**/*"]
+    },
+    {
+      "from": "resources/icon.ico",
+      "to": "icon.ico"
+    }
+  ],
+  "win": {
+    "target": [
+      {
+        "target": "nsis",
+        "arch": ["x64"]
+      }
+    ],
+    "icon": "resources/icon.ico",
+    "artifactName": "${productName}-${version}-Setup.${ext}",
+    "sign": null,
+    "signDlls": false
+  },
+  "nsis": {
+    "oneClick": false,
+    "perMachine": false,
+    "allowToChangeInstallationDirectory": true,
+    "allowElevation": true,
+    "installerIcon": "resources/icon.ico",
+    "uninstallerIcon": "resources/icon.ico",
+    "installerHeaderIcon": "resources/icon.ico",
+    "createDesktopShortcut": true,
+    "createStartMenuShortcut": true,
+    "shortcutName": "TDN Module Toolkit",
+    "deleteAppDataOnUninstall": true,
+    "differentialPackage": false
+  },
+  "publish": null
+}

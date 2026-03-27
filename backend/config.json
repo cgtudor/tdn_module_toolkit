@@ -1,0 +1,11 @@
+{
+  "module_path": "D:\\tdn\\workspace\\tdn_gff\\module",
+  "custom_tlk_path": "D:\\tdn\\workspace\\tdn_gff\\tools\\tdn_module_toolkit\\backend\\tlk\\dragonsneck.tlk.json",
+  "base_tlk_path": "D:\\tdn\\workspace\\tdn_gff\\tools\\tdn_module_toolkit\\backend\\tlk\\dialog.tlk.json",
+  "tda_folder_path": "D:\\tdn\\workspace\\TDN_Haks\\tdn_2da",
+  "baseitems_2da_path": "D:\\tdn\\workspace\\TDN_Haks\\tdn_2da\\baseitems.2da",
+  "itemprops_2da_path": "D:\\tdn\\workspace\\TDN_Haks\\tdn_2da\\itemprops.2da",
+  "racialtypes_2da_path": "D:\\tdn\\workspace\\TDN_Haks\\tdn_2da\\racialtypes.2da",
+  "appearance_2da_path": "D:\\tdn\\workspace\\TDN_Haks\\tdn_2da\\appearance.2da",
+  "configured": true
+}

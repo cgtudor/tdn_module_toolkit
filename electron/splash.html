@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>TDN Module Toolkit</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+      color: #e4e4e7;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      -webkit-app-region: drag;
+      user-select: none;
+    }
+
+    .logo-container {
+      margin-bottom: 32px;
+    }
+
+    .logo {
+      width: 96px;
+      height: 96px;
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.05); opacity: 0.9; }
+    }
+
+    h1 {
+      font-size: 24px;
+      font-weight: 600;
+      margin-bottom: 8px;
+      color: #fff;
+    }
+
+    .version {
+      font-size: 12px;
+      color: #a1a1aa;
+      margin-bottom: 32px;
+    }
+
+    .progress-container {
+      width: 280px;
+      margin-bottom: 16px;
+    }
+
+    .progress-bar {
+      width: 100%;
+      height: 4px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 2px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #3b82f6, #8b5cf6);
+      border-radius: 2px;
+      transition: width 0.3s ease;
+    }
+
+    .progress-indeterminate .progress-fill {
+      width: 30%;
+      animation: indeterminate 1.5s ease-in-out infinite;
+    }
+
+    @keyframes indeterminate {
+      0% { transform: translateX(-100%); }
+      100% { transform: translateX(400%); }
+    }
+
+    .status {
+      font-size: 13px;
+      color: #a1a1aa;
+      text-align: center;
+      min-height: 20px;
+    }
+
+    .substatus {
+      font-size: 11px;
+      color: #71717a;
+      text-align: center;
+      margin-top: 4px;
+      min-height: 16px;
+    }
+
+    .spinner {
+      width: 16px;
+      height: 16px;
+      border: 2px solid rgba(255, 255, 255, 0.1);
+      border-top-color: #3b82f6;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      display: inline-block;
+      vertical-align: middle;
+      margin-right: 8px;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .error {
+      color: #f87171;
+    }
+
+    .error-container {
+      display: none;
+      text-align: center;
+      padding: 16px;
+    }
+
+    .error-container.visible {
+      display: block;
+    }
+
+    .error-title {
+      color: #f87171;
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+
+    .error-message {
+      color: #a1a1aa;
+      font-size: 13px;
+      margin-bottom: 16px;
+      max-width: 300px;
+    }
+
+    .loading-container {
+      text-align: center;
+    }
+
+    .loading-container.hidden {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="logo-container">
+    <svg class="logo" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <!-- Dragon neck silhouette -->
+      <defs>
+        <linearGradient id="dragonGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" style="stop-color:#3b82f6"/>
+          <stop offset="100%" style="stop-color:#8b5cf6"/>
+        </linearGradient>
+      </defs>
+      <circle cx="50" cy="50" r="45" fill="url(#dragonGrad)" opacity="0.2"/>
+      <circle cx="50" cy="50" r="35" fill="url(#dragonGrad)" opacity="0.3"/>
+      <path d="M30 70 Q35 50 50 40 Q65 30 75 35 Q80 40 78 50 Q75 60 65 65 Q55 70 50 68 Q45 75 35 75 Q30 75 30 70"
+            fill="url(#dragonGrad)" opacity="0.8"/>
+      <circle cx="70" cy="42" r="3" fill="#fff"/>
+    </svg>
+  </div>
+
+  <h1>TDN Module Toolkit</h1>
+  <div class="version" id="version">Loading...</div>
+
+  <div class="loading-container" id="loadingContainer">
+    <div class="progress-container">
+      <div class="progress-bar progress-indeterminate" id="progressBar">
+        <div class="progress-fill" id="progressFill"></div>
+      </div>
+    </div>
+
+    <div class="status" id="status">
+      <span class="spinner"></span>
+      <span id="statusText">Initializing...</span>
+    </div>
+    <div class="substatus" id="substatus"></div>
+  </div>
+
+  <div class="error-container" id="errorContainer">
+    <div class="error-title" id="errorTitle">Startup Error</div>
+    <div class="error-message" id="errorMessage"></div>
+  </div>
+
+  <script>
+    // Listen for messages from the main process
+    window.electronSplash = {
+      updateStatus: (status, substatus) => {
+        document.getElementById('statusText').textContent = status;
+        document.getElementById('substatus').textContent = substatus || '';
+      },
+
+      setProgress: (percent) => {
+        const progressBar = document.getElementById('progressBar');
+        const progressFill = document.getElementById('progressFill');
+
+        if (percent >= 0) {
+          progressBar.classList.remove('progress-indeterminate');
+          progressFill.style.width = percent + '%';
+        } else {
+          progressBar.classList.add('progress-indeterminate');
+          progressFill.style.width = '30%';
+        }
+      },
+
+      setVersion: (version) => {
+        document.getElementById('version').textContent = 'v' + version;
+      },
+
+      showError: (title, message) => {
+        document.getElementById('loadingContainer').classList.add('hidden');
+        document.getElementById('errorContainer').classList.add('visible');
+        document.getElementById('errorTitle').textContent = title;
+        document.getElementById('errorMessage').textContent = message;
+      }
+    };
+  </script>
+</body>
+</html>

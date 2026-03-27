@@ -1,0 +1,36 @@
+{
+  "name": "tdn-module-toolkit",
+  "version": "1.0.0",
+  "description": "TDN Module Toolkit - Desktop application for managing NWN module content",
+  "main": "electron/dist/main.js",
+  "author": "TDN Team",
+  "license": "MIT",
+  "private": true,
+  "scripts": {
+    "dev": "concurrently --kill-others \"npm run dev:backend\" \"npm run dev:frontend\" \"npm run dev:electron\"",
+    "dev:backend": "cd backend && venv\\Scripts\\python -m uvicorn main:app --host 127.0.0.1 --port 8000 --reload",
+    "dev:frontend": "cd frontend && npm run dev",
+    "dev:electron": "wait-on http-get://127.0.0.1:8000/api/system/status && npm run electron:compile && electron .",
+    "electron:compile": "tsc -p electron/tsconfig.json",
+    "build": "npm run build:frontend && npm run electron:compile",
+    "build:frontend": "cd frontend && set ELECTRON_BUILD=true && npm run build",
+    "build:backend": "build-backend.bat",
+    "build:all": "build-app.bat",
+    "package": "electron-builder",
+    "start": "electron ."
+  },
+  "dependencies": {
+    "electron-is-dev": "^2.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.6",
+    "concurrently": "^8.2.2",
+    "electron": "^28.1.0",
+    "electron-builder": "^24.9.1",
+    "typescript": "^5.3.3",
+    "wait-on": "^9.0.3"
+  },
+  "build": {
+    "extends": "electron-builder.json"
+  }
+}
