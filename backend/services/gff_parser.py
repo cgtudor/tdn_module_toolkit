@@ -65,12 +65,14 @@ FIELD_TYPE_NAMES: Dict[int, str] = {
 # Reverse lookup for JSON type name -> field type ID
 FIELD_TYPE_IDS: Dict[str, int] = {v: k for k, v in FIELD_TYPE_NAMES.items()}
 
-# Complex types store data at an offset in the field data block
+# Complex types that store data at an offset in the field data block
 # (rather than inline in the dataOrOffset field).
-_COMPLEX_TYPES = frozenset({
+# Note: Struct uses a struct-array index and List uses a list-indices-array
+# offset — neither uses the field data block, so they are excluded here.
+_COMPLEX_FIELD_DATA_TYPES = frozenset({
     FIELD_TYPE_DWORD64, FIELD_TYPE_INT64, FIELD_TYPE_DOUBLE,
     FIELD_TYPE_CEXOSTRING, FIELD_TYPE_RESREF, FIELD_TYPE_CEXOLOCSTRING,
-    FIELD_TYPE_VOID, FIELD_TYPE_STRUCT, FIELD_TYPE_LIST,
+    FIELD_TYPE_VOID,
 })
 
 # NWN encoding for string data
@@ -470,7 +472,7 @@ def write_gff(data: dict) -> bytes:
                 entries: List[Tuple[int, bytes]] = []
 
                 # Check for strref at field level first (legacy pattern
-                # produced by GFFService.set_locstring and older nwn_gff):
+                # from older nwn_gff versions):
                 #   {"id": 12837, "type": "cexolocstring", "value": {}}
                 if "id" in val:
                     str_ref = int(val["id"])
@@ -499,9 +501,12 @@ def write_gff(data: dict) -> bytes:
 
             elif f_kind == FIELD_TYPE_VOID:
                 data_or_offset = len(field_data)
-                # value64 contains base64-encoded data
-                raw_key = "value64" if "value64" in val else "value"
-                raw_data = base64.b64decode(val[raw_key])
+                # "value64" is base64-encoded (current format).
+                # "value" is raw string bytes (legacy format, per gffjson.nim).
+                if "value64" in val:
+                    raw_data = base64.b64decode(val["value64"])
+                else:
+                    raw_data = val["value"].encode("latin-1")
                 field_data.extend(struct.pack("<I", len(raw_data)))
                 field_data.extend(raw_data)
 

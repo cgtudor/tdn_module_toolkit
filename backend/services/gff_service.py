@@ -232,28 +232,40 @@ class GFFService:
     def set_locstring(data: dict, key: str, text: str = None, string_ref: int = None):
         """Set a localized string value in GFF data.
 
+        The StrRef "id" is stored inside the "value" dict, matching the
+        current nwn_gff / gffjson.nim format.  When *text* or *string_ref*
+        is ``None`` the corresponding part of the locstring is left
+        unchanged (pass an empty string or ``-1`` to explicitly clear).
+
         Args:
             data: The GFF data dictionary to modify
             key: The key for the localized string (e.g., "LocalizedName")
-            text: Text to set for language 0 (English)
-            string_ref: TLK string reference ID
+            text: Text to set for language 0 (English). None leaves existing text unchanged.
+            string_ref: TLK string reference ID. None leaves existing StrRef unchanged.
         """
         if key in data and isinstance(data[key], dict) and "type" in data[key]:
-            # Preserve type, update value
+            # Preserve existing value dict so we don't lose entries
+            existing_value = data[key].get("value", {})
+            if not isinstance(existing_value, dict):
+                existing_value = {}
+
+            # Migrate any legacy outer-level "id" into the value dict
+            if "id" in data[key]:
+                if "id" not in existing_value:
+                    existing_value["id"] = data[key]["id"]
+                del data[key]["id"]
+
+            if text is not None:
+                existing_value["0"] = text
+            if string_ref is not None:
+                existing_value["id"] = string_ref
+
+            data[key]["value"] = existing_value
+        else:
+            # Create new locstring — "id" goes inside "value"
             value_dict = {}
             if text is not None:
                 value_dict["0"] = text
             if string_ref is not None:
-                data[key]["id"] = string_ref
-            elif "id" in data[key]:
-                # Clear id if no string_ref provided
-                del data[key]["id"]
-            data[key]["value"] = value_dict
-        else:
-            # Create new locstring
-            loc = {"type": "cexolocstring", "value": {}}
-            if text is not None:
-                loc["value"]["0"] = text
-            if string_ref is not None:
-                loc["id"] = string_ref
-            data[key] = loc
+                value_dict["id"] = string_ref
+            data[key] = {"type": "cexolocstring", "value": value_dict}
