@@ -112,6 +112,14 @@ class ConfigService:
                     data['tda_folder_path'] = str(baseitems_path.parent)
                     print(f"Migrated tda_folder_path from baseitems_2da_path: {data['tda_folder_path']}")
 
+            # Migration: fill in new icon-related paths from defaults if missing
+            for key in ('hak_source_path', 'nwn_root_path'):
+                if not data.get(key) and key in cls._RAW_DEFAULT_PATHS:
+                    default_val = cls._RAW_DEFAULT_PATHS[key]
+                    if default_val and Path(default_val).exists():
+                        data[key] = default_val
+                        print(f"Migrated {key} from default: {default_val}")
+
             return ConfigData(**data)
         except (json.JSONDecodeError, Exception) as e:
             print(f"Error loading config: {e}")

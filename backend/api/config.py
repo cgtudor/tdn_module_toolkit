@@ -24,6 +24,8 @@ class ConfigUpdateRequest(BaseModel):
     custom_tlk_path: Optional[str] = ""
     base_tlk_path: Optional[str] = ""
     tda_folder_path: str = ""
+    hak_source_path: Optional[str] = ""
+    nwn_root_path: Optional[str] = ""
 
 
 class ValidationRequest(BaseModel):
@@ -34,6 +36,8 @@ class ValidationRequest(BaseModel):
     custom_tlk_path: Optional[str] = ""
     base_tlk_path: Optional[str] = ""
     tda_folder_path: str = ""
+    hak_source_path: Optional[str] = ""
+    nwn_root_path: Optional[str] = ""
 
 
 class BrowseRequest(BaseModel):
@@ -52,6 +56,8 @@ async def get_config():
         "custom_tlk_path": config.custom_tlk_path,
         "base_tlk_path": config.base_tlk_path,
         "tda_folder_path": config.tda_folder_path,
+        "hak_source_path": config.hak_source_path,
+        "nwn_root_path": config.nwn_root_path,
         "configured": config.configured
     }
 
@@ -78,6 +84,8 @@ async def validate_config(request: ValidationRequest):
         custom_tlk_path=request.custom_tlk_path or "",
         base_tlk_path=request.base_tlk_path or "",
         tda_folder_path=request.tda_folder_path,
+        hak_source_path=request.hak_source_path or "",
+        nwn_root_path=request.nwn_root_path or "",
         configured=False
     )
 
@@ -108,6 +116,8 @@ async def save_config(request: ConfigUpdateRequest):
         custom_tlk_path=request.custom_tlk_path or "",
         base_tlk_path=request.base_tlk_path or "",
         tda_folder_path=request.tda_folder_path,
+        hak_source_path=request.hak_source_path or "",
+        nwn_root_path=request.nwn_root_path or "",
         configured=False
     )
 
@@ -133,7 +143,9 @@ async def get_default_config():
         "mod_file_path": defaults.mod_file_path,
         "custom_tlk_path": defaults.custom_tlk_path,
         "base_tlk_path": defaults.base_tlk_path,
-        "tda_folder_path": defaults.tda_folder_path
+        "tda_folder_path": defaults.tda_folder_path,
+        "hak_source_path": defaults.hak_source_path,
+        "nwn_root_path": defaults.nwn_root_path
     }
 
 

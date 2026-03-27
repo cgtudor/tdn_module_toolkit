@@ -34,6 +34,8 @@ export function ConfigDialog({ open, onConfigured, onCancel, isReconfigure }: Co
   const [customTlkPath, setCustomTlkPath] = useState('');
   const [baseTlkPath, setBaseTlkPath] = useState('');
   const [tdaFolderPath, setTdaFolderPath] = useState('');
+  const [hakSourcePath, setHakSourcePath] = useState('');
+  const [nwnRootPath, setNwnRootPath] = useState('');
 
   const [validation, setValidation] = useState<ValidationResults | null>(null);
   const [isSaving, setIsSaving] = useState(false);
@@ -57,6 +59,8 @@ export function ConfigDialog({ open, onConfigured, onCancel, isReconfigure }: Co
       setCustomTlkPath(config.custom_tlk_path || '');
       setBaseTlkPath(config.base_tlk_path || '');
       setTdaFolderPath(config.tda_folder_path || '');
+      setHakSourcePath(config.hak_source_path || '');
+      setNwnRootPath(config.nwn_root_path || '');
     } catch (err) {
       console.error('Failed to load config:', err);
     }
@@ -79,6 +83,8 @@ export function ConfigDialog({ open, onConfigured, onCancel, isReconfigure }: Co
           custom_tlk_path: customTlkPath,
           base_tlk_path: baseTlkPath,
           tda_folder_path: tdaFolderPath,
+          hak_source_path: hakSourcePath,
+          nwn_root_path: nwnRootPath,
         }),
       });
 
@@ -104,6 +110,8 @@ export function ConfigDialog({ open, onConfigured, onCancel, isReconfigure }: Co
           custom_tlk_path: customTlkPath,
           base_tlk_path: baseTlkPath,
           tda_folder_path: tdaFolderPath,
+          hak_source_path: hakSourcePath,
+          nwn_root_path: nwnRootPath,
         }),
       });
 
@@ -303,6 +311,46 @@ export function ConfigDialog({ open, onConfigured, onCancel, isReconfigure }: Co
                 {validation.base_tlk_path.message}
               </p>
             )}
+          </div>
+
+          {/* Hak Source Path */}
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <Label htmlFor="hak-source-path" className="flex items-center gap-2">
+                <FolderOpen className="h-4 w-4" />
+                Hak Source Path (TDN_Haks)
+              </Label>
+            </div>
+            <PathBrowser
+              id="hak-source-path"
+              value={hakSourcePath}
+              onChange={setHakSourcePath}
+              placeholder="D:\tdn\workspace\TDN_Haks"
+              mode="folder"
+            />
+            <p className="text-xs text-muted-foreground">
+              Path to TDN_Haks directory containing custom item icons and textures.
+            </p>
+          </div>
+
+          {/* NWN Root Path */}
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <Label htmlFor="nwn-root-path" className="flex items-center gap-2">
+                <FolderOpen className="h-4 w-4" />
+                NWN:EE Install Path
+              </Label>
+            </div>
+            <PathBrowser
+              id="nwn-root-path"
+              value={nwnRootPath}
+              onChange={setNwnRootPath}
+              placeholder="C:\Games\Steam\steamapps\common\Neverwinter Nights"
+              mode="folder"
+            />
+            <p className="text-xs text-muted-foreground">
+              Path to NWN:EE installation for base game icons (KEY/BIF files).
+            </p>
           </div>
 
           {/* Info Card */}
