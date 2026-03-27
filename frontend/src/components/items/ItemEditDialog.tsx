@@ -8,10 +8,11 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Package, AlertTriangle, Loader2 } from 'lucide-react';
+import { Package, AlertTriangle, Loader2, ImageIcon } from 'lucide-react';
 import { ItemDetail, ItemTemplateUpdate, ItemPropertyInput, ScriptVariableInput, PaletteCategory } from '@/types/item';
 import { ItemPropertyEditor } from './ItemPropertyEditor';
 import { ItemVariableEditor } from './ItemVariableEditor';
+import { IconPicker } from './IconPicker';
 import { usePaletteCategories } from '@/hooks/useItems';
 
 interface ItemEditDialogProps {
@@ -52,6 +53,12 @@ export function ItemEditDialog({
 
   // Variables
   const [variables, setVariables] = useState<ScriptVariableInput[]>([]);
+
+  // Model parts (icon/appearance)
+  const [modelPart1, setModelPart1] = useState(1);
+  const [modelPart2, setModelPart2] = useState(1);
+  const [modelPart3, setModelPart3] = useState(1);
+  const [iconPickerOpen, setIconPickerOpen] = useState(false);
 
   // Advanced
   const [newResref, setNewResref] = useState('');
@@ -103,11 +110,26 @@ export function ItemEditDialog({
         value: v.value,
       })));
 
+      // Model parts from raw data
+      const rawPart1 = extractRawValue(item.raw_data, 'ModelPart1', 1);
+      const rawPart2 = extractRawValue(item.raw_data, 'ModelPart2', 1);
+      const rawPart3 = extractRawValue(item.raw_data, 'ModelPart3', 1);
+      setModelPart1(rawPart1);
+      setModelPart2(rawPart2);
+      setModelPart3(rawPart3);
+
       setNewResref(item.resref);
       setPaletteCategory(item.palette_id ?? undefined);
       setResrefError(null);
     }
   }, [open, item]);
+
+  // Extract a numeric value from raw GFF data
+  const extractRawValue = (rawData: Record<string, unknown> | undefined, key: string, defaultValue: number): number => {
+    if (!rawData || !rawData[key]) return defaultValue;
+    const field = rawData[key] as { value?: number };
+    return typeof field.value === 'number' ? field.value : defaultValue;
+  };
 
   // Extract DescIdentified from raw GFF data
   const extractDescIdentified = (rawData?: Record<string, unknown>): string => {
@@ -214,6 +236,20 @@ export function ItemEditDialog({
       update.variables = variables;
     }
 
+    // Model parts
+    const origPart1 = extractRawValue(item.raw_data, 'ModelPart1', 1);
+    const origPart2 = extractRawValue(item.raw_data, 'ModelPart2', 1);
+    const origPart3 = extractRawValue(item.raw_data, 'ModelPart3', 1);
+    if (modelPart1 !== origPart1) {
+      update.model_part1 = modelPart1;
+    }
+    if (modelPart2 !== origPart2) {
+      update.model_part2 = modelPart2;
+    }
+    if (modelPart3 !== origPart3) {
+      update.model_part3 = modelPart3;
+    }
+
     // Advanced
     if (newResref !== item.resref) {
       update.new_resref = newResref;
@@ -238,6 +274,9 @@ export function ItemEditDialog({
     if (stolen !== item.stolen) return true;
     if (description !== (item.description || '')) return true;
     if (descIdentified !== extractDescIdentified(item.raw_data)) return true;
+    if (modelPart1 !== extractRawValue(item.raw_data, 'ModelPart1', 1)) return true;
+    if (modelPart2 !== extractRawValue(item.raw_data, 'ModelPart2', 1)) return true;
+    if (modelPart3 !== extractRawValue(item.raw_data, 'ModelPart3', 1)) return true;
     if (newResref !== item.resref) return true;
     if (paletteCategory !== item.palette_id && paletteCategory !== undefined) return true;
     // Check properties
@@ -292,6 +331,28 @@ export function ItemEditDialog({
           <ScrollArea className="h-[400px] mt-4">
             {/* Basic Tab */}
             <TabsContent value="basic" className="space-y-4 pr-4">
+              {/* Icon preview + change button */}
+              <div className="flex items-center gap-4 p-3 bg-muted/50 rounded-lg">
+                <div className="w-16 h-16 rounded bg-muted flex items-center justify-center overflow-hidden flex-shrink-0">
+                  <img
+                    src={`/api/icons/preview?base_item=${item.base_item}&p1=${modelPart1}&p2=${modelPart2}&p3=${modelPart3}`}
+                    alt="Item icon"
+                    className="w-16 h-16 object-contain"
+                    style={{ imageRendering: 'pixelated' }}
+                    onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                  />
+                </div>
+                <div className="flex-1">
+                  <div className="text-sm text-muted-foreground">
+                    Parts: {modelPart1}/{modelPart2}/{modelPart3}
+                  </div>
+                </div>
+                <Button variant="outline" size="sm" onClick={() => setIconPickerOpen(true)}>
+                  <ImageIcon className="h-4 w-4 mr-1" />
+                  Change Icon
+                </Button>
+              </div>
+
               <div className="space-y-2">
                 <Label htmlFor="name">Name</Label>
                 <Input
@@ -552,6 +613,21 @@ export function ItemEditDialog({
           </Button>
         </DialogFooter>
       </DialogContent>
+
+      {/* Icon Picker Dialog */}
+      <IconPicker
+        open={iconPickerOpen}
+        onOpenChange={setIconPickerOpen}
+        baseItem={item.base_item}
+        currentPart1={modelPart1}
+        currentPart2={modelPart2}
+        currentPart3={modelPart3}
+        onSelect={(p1, p2, p3) => {
+          setModelPart1(p1);
+          setModelPart2(p2);
+          setModelPart3(p3);
+        }}
+      />
     </Dialog>
   );
 }

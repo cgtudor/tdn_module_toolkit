@@ -132,6 +132,11 @@ class ItemTemplateUpdate(BaseModel):
     # Script variables (full replacement)
     variables: Optional[List[ScriptVariableInput]] = None
 
+    # Model parts (icon/appearance)
+    model_part1: Optional[int] = None
+    model_part2: Optional[int] = None
+    model_part3: Optional[int] = None
+
     # Advanced (triggers rename/palette updates)
     new_resref: Optional[str] = None
     palette_category: Optional[int] = None

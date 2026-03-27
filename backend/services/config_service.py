@@ -34,6 +34,8 @@ class ConfigData(BaseModel):
     itemprops_2da_path: str = ""
     racialtypes_2da_path: str = ""
     appearance_2da_path: str = ""
+    hak_source_path: str = ""  # Path to TDN_Haks directory (for item icons)
+    nwn_root_path: str = ""  # Path to NWN:EE installation (for base game icons)
     configured: bool = False
 
 
@@ -50,6 +52,8 @@ class ConfigService:
         "itemprops_2da_path": r"D:\tdn\workspace\TDN_Haks\tdn_2da\itemprops.2da",
         "racialtypes_2da_path": r"D:\tdn\workspace\TDN_Haks\tdn_2da\racialtypes.2da",
         "appearance_2da_path": r"D:\tdn\workspace\TDN_Haks\tdn_2da\appearance.2da",
+        "hak_source_path": r"D:\tdn\workspace\TDN_Haks",
+        "nwn_root_path": r"C:\Games\Steam\steamapps\common\Neverwinter Nights",
     }
 
     @classmethod
@@ -540,6 +544,24 @@ class ConfigService:
         config = self.get_config()
         if config.tda_folder_path:
             path = Path(config.tda_folder_path)
+            if path.exists() and path.is_dir():
+                return path
+        return None
+
+    def get_hak_source_path(self) -> Optional[Path]:
+        """Get path to TDN_Haks directory (for item icons)."""
+        config = self.get_config()
+        if config.hak_source_path:
+            path = Path(config.hak_source_path)
+            if path.exists() and path.is_dir():
+                return path
+        return None
+
+    def get_nwn_root_path(self) -> Optional[Path]:
+        """Get path to NWN:EE installation directory."""
+        config = self.get_config()
+        if config.nwn_root_path:
+            path = Path(config.nwn_root_path)
             if path.exists() and path.is_dir():
                 return path
         return None

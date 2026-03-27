@@ -3,9 +3,10 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { getBaseItemName } from '@/lib/baseItems';
-import { Package, Tag, Coins, Layers, Zap, Shield, Info, RefreshCw, Users, Store, Map, AlertCircle, CheckCircle, Edit } from 'lucide-react';
+import { Tag, Coins, Layers, Zap, Shield, Info, RefreshCw, Users, Store, Map, AlertCircle, CheckCircle, Edit } from 'lucide-react';
 import { useState } from 'react';
 import { ItemEditDialog } from './ItemEditDialog';
+import { ItemIcon } from './ItemIcon';
 import { ItemTemplateUpdate } from '@/types/item';
 
 interface ItemDetailProps {
@@ -69,9 +70,7 @@ export function ItemDetail({ resref }: ItemDetailProps) {
     <div className="p-6 space-y-6">
       {/* Header */}
       <div className="flex items-start gap-4">
-        <div className="w-16 h-16 rounded-lg bg-muted flex items-center justify-center">
-          <Package className="h-8 w-8 text-muted-foreground" />
-        </div>
+        <ItemIcon resref={resref} baseItem={item.base_item} size="lg" className="rounded-lg" />
         <div className="flex-1">
           <h2 className="text-2xl font-bold">{item.name || item.resref}</h2>
           <div className="flex gap-2 mt-1">

@@ -107,6 +107,11 @@ export interface ItemTemplateUpdate {
   // Script variables (full replacement)
   variables?: ScriptVariableInput[];
 
+  // Model parts (icon/appearance)
+  model_part1?: number;
+  model_part2?: number;
+  model_part3?: number;
+
   // Advanced
   new_resref?: string;
   palette_category?: number;

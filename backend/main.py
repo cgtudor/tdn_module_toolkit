@@ -69,6 +69,7 @@ try:
     from services.tlk_service import TLKService
     from services.tda_service import TDAService
     from services.palette_service import PaletteService
+    from services.icon_service import IconService
 
     from api import items as items_api
     from api import creatures as creatures_api
@@ -76,6 +77,7 @@ try:
     from api import instances as instances_api
     from api import search as search_api
     from api import config as config_api
+    from api import icons as icons_api
     
     logger.info("All imports successful")
 except Exception as e:
@@ -145,6 +147,7 @@ inventory_ops: InventoryOperations = None
 tlk_service: TLKService = None
 tda_service: TDAService = None
 palette_service: PaletteService = None
+icon_service: IconService = None
 
 # Event queue for SSE
 event_queue: asyncio.Queue = None
@@ -200,7 +203,7 @@ def _initialize_services():
     asyncio.Queue must be created in the async context (not in a thread pool).
     The caller is responsible for creating those after this function returns.
     """
-    global gff_service, current_backend, indexer, inventory_ops, tlk_service, tda_service, palette_service
+    global gff_service, current_backend, indexer, inventory_ops, tlk_service, tda_service, palette_service, icon_service
     global is_indexing, indexing_message, app_state, app_error_message
 
     app_state = "initializing"
@@ -265,6 +268,18 @@ def _initialize_services():
     new_palette_service = PaletteService(new_backend)
     print("Core services initialized", flush=True)
 
+    # Initialize icon service
+    indexing_message = "Loading icon resources..."
+    print("Loading icon resources...", flush=True)
+    hak_source_path = config_service.get_hak_source_path()
+    nwn_root_path = config_service.get_nwn_root_path()
+    new_icon_service = IconService(
+        tda_service=new_tda_service,
+        hak_source_path=hak_source_path,
+        nwn_root_path=nwn_root_path,
+    )
+    print("Icon service initialized", flush=True)
+
     # Initialize API modules
     print("Initializing API modules...", flush=True)
     items_api.init(new_gff_service, new_indexer, new_inventory_ops, new_tda_service, new_palette_service)
@@ -272,6 +287,7 @@ def _initialize_services():
     stores_api.init(new_gff_service, new_indexer, new_inventory_ops, new_tda_service)
     instances_api.init(new_gff_service, new_indexer, new_inventory_ops, new_tda_service, new_tlk_service)
     search_api.init(new_indexer)
+    icons_api.init(new_icon_service, new_gff_service)
     print("API modules initialized", flush=True)
 
     # Progress callback to update indexing_message for API status
@@ -303,6 +319,7 @@ def _initialize_services():
     tlk_service = new_tlk_service
     tda_service = new_tda_service
     palette_service = new_palette_service
+    icon_service = new_icon_service
 
     app_state = "ready"
     app_error_message = None
@@ -430,6 +447,7 @@ app.include_router(creatures_api.router)
 app.include_router(stores_api.router)
 app.include_router(instances_api.router)
 app.include_router(search_api.router)
+app.include_router(icons_api.router)
 
 # Serve static assets (JS, CSS, images) from pre-built frontend
 if FRONTEND_DIST.exists() and (FRONTEND_DIST / "assets").exists():

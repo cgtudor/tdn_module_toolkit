@@ -1,7 +1,7 @@
-import { Package } from 'lucide-react';
 import { getBaseItemName } from '@/lib/baseItems';
 import { cn } from '@/lib/utils';
 import { ItemSummary } from '@/types/item';
+import { ItemIcon } from './ItemIcon';
 
 interface ItemCardProps {
   item: ItemSummary;
@@ -18,9 +18,7 @@ export function ItemCard({ item, selected, onClick }: ItemCardProps) {
       )}
       onClick={onClick}
     >
-      <div className="w-8 h-8 rounded bg-muted flex items-center justify-center flex-shrink-0">
-        <Package className="h-4 w-4 text-muted-foreground" />
-      </div>
+      <ItemIcon resref={item.resref} baseItem={item.base_item} size="sm" />
       <div className="flex-1 min-w-0">
         <div className="font-medium truncate">
           {item.name || item.resref}
